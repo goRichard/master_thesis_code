@@ -1,8 +1,8 @@
-from ClusterAlgorithm import *
-from get_data import *
+from data.get_pressure_data import *
 from sklearn.mixture import GaussianMixture
 import matplotlib.pyplot as plt
 from sklearn.metrics.cluster import silhouette_score
+import tqdm
 
 n_components_list = list(range(1, 30))
 models = [GaussianMixture(n_components=n, covariance_type="full").fit(X_transformed_ss) for n in

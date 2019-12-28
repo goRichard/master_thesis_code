@@ -1,41 +1,45 @@
-from WaterNetWorkBasics import *
 from data.get_file_path import *
+from WaterNetWorkBasics import *
+import os
+
+data_path = os.getcwd()
+
+file_path = [x for x in os.listdir(data_path) if os.path.isfile(x)]
+inp_file_path = [x for x in file_path if os.path.splitext(x)[1] == ".inp"]
+result_file_paths = [x for x in file_path if os.path.splitext(x)[1] == ".csv"]
+
+for result_file_path in result_file_paths:
+    if "epanet" in os.path.splitext(result_file_path)[0]:
+        result_file_path_epanet = result_file_path
+    else:
+        result_file_path_wntr = result_file_path
 
 
-class GetConnectivityMatrix(object):
+# get the number of junctions
+ctown = WaterNetWorkBasics(inp_file_path, "c_town")
+n_junctions = ctown.describe["junctions"]
+print(n_junctions)
 
-    def __init__(self, name_of_town):
-        self.name = name_of_town
-        print(data_path)
-        self.file_path = get_inp_file_path(data_path)
-        print(self.file_path)
-        self.ctown = WaterNetWorkBasics(self.file_path, self.name)
-        # initialise a connectivity matrix
-        self.n_junctions = self.ctown.describe["junctions"]
-        # junction name
-        self.junction_names = np.array(self.ctown.name_list["node_name_list"]["junction_names"])
-        # pipe name
-        pipe_names = self.ctown.name_list["link_name_list"]["pipe_names"]
-        pipes = self.ctown.get_link(pipe_names)
-        self.pipe_start_nodes = [pipe.start_node_name for pipe in pipes]
-        self.pipe_end_nodes = [pipe.end_node_name for pipe in pipes]
+# junction name
+junction_names = np.array(ctown.name_list["node_name_list"]["junction_names"])
 
-    def get_matrix(self):
-        A = np.zeros([self.n_junctions, self.n_junctions])
-        for pipe_start_node, pipe_end_node in zip(self.pipe_start_nodes, self.pipe_end_nodes):
-            i = np.where(self.junction_names == pipe_start_node)
-            j = np.where(self.junction_names == pipe_end_node)
-            A[i, j] = 1
-            A[j, i] = 1
-
-        print(A)
-        return A
+# pipe name
+pipe_names = ctown.name_list["link_name_list"]["pipe_names"]
+pipes = ctown.get_link(pipe_names)
+pipe_start_nodes = [pipe.start_node_name for pipe in pipes]
+pipe_end_nodes = [pipe.end_node_name for pipe in pipes]
+print(pipe_end_nodes)
 
 
-if __name__ == "__main__":
-    get_connectivity_matrix = GetConnectivityMatrix("c_town")
-    matrix = get_connectivity_matrix.get_matrix()
-    print(matrix)
-    plt.figure()
-    plt.spy(matrix)
-    plt.show()
+# initialise a connectivity matrix
+A = np.zeros([n_junctions, n_junctions])
+for pipe_start_node, pipe_end_node in zip(pipe_start_nodes, pipe_end_nodes):
+    i = np.where(junction_names == pipe_start_node)
+    j = np.where(junction_names == pipe_end_node)
+    A[i, j] = 1
+    A[j, i] = 1
+
+print(A)
+plt.figure()
+plt.spy(A)
+plt.show()

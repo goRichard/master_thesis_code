@@ -10,15 +10,13 @@ class GetPressureData(object):
 
     def __init__(self, town_name, name_of_simulator):
         # get file path
-        file_path = get_inp_file_path(data_path)
         print(file_path)
         self.town_name = town_name
         self.name_of_simulator = name_of_simulator
-        self.ctown = WaterNetWorkBasics(file_path, self.town_name)
+        self.ctown = WaterNetWorkBasics(inp_file_path, self.town_name)
         self.junctions_names = self.ctown.name_list['node_name_list']["junction_names"]
         # read epanet results
-        self.result_file_path = get_result_file_path(self.name_of_simulator, data_path)
-        epanet_pressure_results = pd.read_csv(self.result_file_path)
+        epanet_pressure_results = pd.read_csv(result_file_path_epanet)
         # get data
         self.X = epanet_pressure_results.loc[:, self.junctions_names].values.T
         # get scaled data
