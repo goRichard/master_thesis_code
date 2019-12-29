@@ -124,7 +124,6 @@ class WaterNetWorkBasics:
         return time_series
 
 
-
 class PlotWaterNetWorks(WaterNetWorkBasics):
 
     def __init__(self, inp_file, town_name):

@@ -1,5 +1,5 @@
-from ClusterAlgorithm import *
-from get_data import *
+from Clustering_Algorithm.ClusterAlgorithm import *
+from data.get_pressure_data import *
 
 # define a list with n_clusters
 n_clusters_list = list(range(5, 101))    # get 5 to 100
@@ -12,17 +12,20 @@ result_ss = running_KMeans(X_transformed_ss, n_clusters_list) # data preprocesse
 """
 
 
-result_raw = running_KMeans(X_normalized, n_clusters_list) # data without preprocessing
-result_mms = running_KMeans(X_normalized_mms, n_clusters_list) # data preprocessed with mms
-result_ss = running_KMeans(X_normalized_ss, n_clusters_list) # data preprocessed with ss
+result_raw = running_KMeans(X_epanet, n_clusters_list) # data without normalization
+result_mms = running_KMeans(X_epanet_mms, n_clusters_list) # data preprocessed with mms
+result_ss = running_KMeans(X_epanet_ss, n_clusters_list) # data preprocessed with ss
+result_normalization = running_KMeans(X_normalized, n_clusters_list) # data normalized
 
 KMeans_dict_raw = result_raw[0]
 KMeans_dict_mms = result_mms[0]
 KMeans_dict_ss = result_ss[0]
+KMeans_dict_normalization = result_normalization[0]
 
 sum_of_squared_distances_raw = result_raw[1]
 sum_of_squared_distances_mms = result_mms[1]
 sum_of_squared_distances_ss = result_ss[1]
+sum_of_squared_distances_normalization = result_normalization[1]
 
 """
 # run KMeans random Algorithm (faster than KMeans ++)
@@ -41,10 +44,10 @@ sum_of_squared_distances_random_ss = result_ss_random[1]
 
 
 # evaluate the KMeans results with 3 methods:
-KMeans_list_1 = evaluate_Algorithm(X_normalized, KMeans_dict_raw, "KMeans")
-KMeans_list_2 = evaluate_Algorithm(X_normalized_mms, KMeans_dict_mms, "KMeans")
-KMeans_list_3 = evaluate_Algorithm(X_normalized_ss, KMeans_dict_ss, "KMeans")
-
+KMeans_list_1 = evaluate_Algorithm(X_epanet, KMeans_dict_raw, "KMeans")
+KMeans_list_2 = evaluate_Algorithm(X_epanet_mms, KMeans_dict_mms, "KMeans")
+KMeans_list_3 = evaluate_Algorithm(X_epanet_ss, KMeans_dict_ss, "KMeans")
+KMeans_list_4 = evaluate_Algorithm(X_normalized, KMeans_dict_normalization, "KMeans")
 
 # plot optimal k by sum_squared_distances with kmeans ++ by elbow methods
 """

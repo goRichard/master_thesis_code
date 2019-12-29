@@ -32,6 +32,8 @@ print(pipe_end_nodes)
 
 
 # initialise a connectivity matrix
+# A is the adjacency  matrix
+# A is a symmetric matrix with diagonal entries equal zero
 A = np.zeros([n_junctions, n_junctions])
 for pipe_start_node, pipe_end_node in zip(pipe_start_nodes, pipe_end_nodes):
     i = np.where(junction_names == pipe_start_node)
@@ -39,7 +41,7 @@ for pipe_start_node, pipe_end_node in zip(pipe_start_nodes, pipe_end_nodes):
     A[i, j] = 1
     A[j, i] = 1
 
-print(A)
-plt.figure()
-plt.spy(A)
-plt.show()
+if __name__ == "__main__":
+    plt.figure()
+    plt.spy(A)
+    plt.show()
