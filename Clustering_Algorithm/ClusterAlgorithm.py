@@ -3,7 +3,6 @@ import matplotlib.pyplot as plt
 from sklearn.cluster import AgglomerativeClustering
 from sklearn.cluster import DBSCAN
 from sklearn.cluster import KMeans
-from sklearn.cluster import spectral_clustering
 from sklearn.mixture import GaussianMixture
 from sklearn.neighbors import NearestNeighbors
 from yellowbrick.cluster import SilhouetteVisualizer
@@ -15,7 +14,74 @@ from tqdm import *
 import math
 import scipy.spatial
 from data.get_pressure_data import *
-import Clustering_Algorithm.get_connectivity_matrix as gm
+from Clustering_Algorithm.get_connectivity_matrix import *
+from sklearn.metrics import pairwise_distances
+
+data_path = os.getcwd()
+
+file_path = [x for x in os.listdir(data_path) if os.path.isfile(x)]
+inp_file_path = [x for x in file_path if os.path.splitext(x)[1] == ".inp"]
+result_file_paths = [x for x in file_path if os.path.splitext(x)[1] == ".csv"]
+
+for result_file_path in result_file_paths:
+    if "epanet" in os.path.splitext(result_file_path)[0]:
+        result_file_path_epanet = result_file_path
+    else:
+        result_file_path_wntr = result_file_path
+
+
+# get the number of junctions
+ctown = WaterNetWorkBasics(inp_file_path, "c_town")
+n_junctions = ctown.describe["junctions"]
+
+# junction name
+junction_names = np.array(ctown.name_list["node_name_list"]["junction_names"])
+
+# pipe name
+pipe_names = ctown.name_list["link_name_list"]["pipe_names"]
+pipes = ctown.get_link(pipe_names)
+pipe_start_nodes = [pipe.start_node_name for pipe in pipes]
+pipe_end_nodes = [pipe.end_node_name for pipe in pipes]
+
+
+# initialise a connectivity matrix
+# A is the adjacency  matrix
+# A is a symmetric matrix with diagonal entries equal zero
+A = np.zeros([n_junctions, n_junctions])
+for pipe_start_node, pipe_end_node in zip(pipe_start_nodes, pipe_end_nodes):
+    i = np.where(junction_names == pipe_start_node)
+    j = np.where(junction_names == pipe_end_node)
+    A[i, j] = 1
+    A[j, i] = 1
+
+# calculate the pairwise distance between each pair of points
+# X_normalized shape (388, 169) 388 data and each data has 169 feature
+# W is the similarity matrix
+# create similarity matrix based on k-nearest neighbour
+# the diagonal of W_knn is 0
+
+W_knn = pairwise_distances(X_normalized, metric="euclidean")  # shape (388,388)
+
+# get the weighted matrix by considering the distance between two connected points
+W = A * W_knn
+
+
+def get_diagonal(matrix):
+    # assert isinstance(matrix, np.ndarray)
+    col, row = matrix.shape
+    diagonal = []
+    for i in range(col):
+        for j in range(row):
+            if i == j:
+                diagonal.append(matrix[i, j])
+
+    return np.array([diagonal])
+
+
+def matrix_normalize(matrix, D):
+    assert isinstance(matrix, np.ndarray)
+    diagonal = np.diag(1 / np.sqrt(D))
+    return np.dot(np.dot(diagonal, matrix), diagonal)
 
 
 def running_KMeans(data, n_clusters_list):
@@ -29,7 +95,7 @@ def running_KMeans(data, n_clusters_list):
         kmeans.fit(data)
         KMeans_dict[n_clusters] = kmeans.labels_
         sum_of_squared_distances.append(kmeans.inertia_)
-    return KMeans_dict
+    return [KMeans_dict, sum_of_squared_distances]
 
 
 def running_KMeans_random(data, n_clusters_list):
@@ -43,16 +109,29 @@ def running_KMeans_random(data, n_clusters_list):
     return [KMeans_random_dict, sum_of_squared_distances_random]
 
 
-def running_agg_with_connectivity_matrix(data, n_clusters_list):
+def running_agg_with_connectivity_matrix(data, n_clusters_list, which_matrix):
     """
     do not allow to predict the new data, use fit_predict method
     """
     Agg_dict = dict()
-    for n_clusters in tqdm(n_clusters_list):
-        # linkage = ward will minimize the variance within cluster
-        agg = AgglomerativeClustering(n_clusters=n_clusters, connectivity=gm.A, linkage="ward")
-        labels = agg.fit_predict(data)
-        Agg_dict[n_clusters] = labels
+    if which_matrix == "adjacency":
+        for n_clusters in tqdm(n_clusters_list):
+            # linkage = ward will minimize the variance within cluster
+            agg = AgglomerativeClustering(n_clusters=n_clusters, connectivity=A, linkage="ward")
+            labels = agg.fit_predict(data)
+            Agg_dict[n_clusters] = labels
+    elif which_matrix == "W_knn":
+        for n_clusters in tqdm(n_clusters_list):
+            # linkage = ward will minimize the variance within cluster
+            agg = AgglomerativeClustering(n_clusters=n_clusters, connectivity=W_knn, linkage="ward")
+            labels = agg.fit_predict(data)
+            Agg_dict[n_clusters] = labels
+    elif which_matrix == "W":
+        for n_clusters in tqdm(n_clusters_list):
+            # linkage = ward will minimize the variance within cluster
+            agg = AgglomerativeClustering(n_clusters=n_clusters, connectivity=W, linkage="ward")
+            labels = agg.fit_predict(data)
+            Agg_dict[n_clusters] = labels
     return Agg_dict
 
 

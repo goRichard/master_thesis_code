@@ -1,7 +1,6 @@
-from get_data import *
+from data.get_pressure_data import *
 import functools
-from ClusterAlgorithm import *
-
+from Clustering_Algorithm.ClusterAlgorithm import *
 
 # define list of min samples
 min_samples_list = list(range(1, 21))

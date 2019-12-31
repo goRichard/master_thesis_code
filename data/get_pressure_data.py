@@ -59,6 +59,8 @@ X_epanet = GetPressureData.get_data
 X_epanet_mms = get_data_scaled(X_epanet)[0]
 X_epanet_ss = get_data_scaled(X_epanet)[1]
 X_normalized = data_normalization(X_epanet)
+X_normalized_mms = get_data_scaled(X_normalized)[0]
+X_normalized_ss = get_data_scaled(X_normalized)[1]
 
 if __name__ == "__main__":
     # plot the result
