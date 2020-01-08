@@ -2,6 +2,8 @@ from data.get_file_path import *
 import pandas as pd
 from WaterNetWorkBasics import *
 from sklearn.preprocessing import *
+from sklearn.decomposition import PCA
+
 
 
 def data_normalization(data):
@@ -61,6 +63,12 @@ X_epanet_ss = get_data_scaled(X_epanet)[1]
 X_normalized = data_normalization(X_epanet)
 X_normalized_mms = get_data_scaled(X_normalized)[0]
 X_normalized_ss = get_data_scaled(X_normalized)[1]
+# use pca to get the dimension reduction
+pca = PCA(n_components=0.99)
+pca.fit(X_normalized)
+X_reduced = pca.transform(X_normalized) #(388, 10)
+
+
 
 if __name__ == "__main__":
     # plot the result

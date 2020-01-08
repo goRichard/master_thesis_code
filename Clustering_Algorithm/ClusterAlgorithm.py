@@ -14,7 +14,6 @@ from tqdm import *
 import math
 import scipy.spatial
 from data.get_pressure_data import *
-from Clustering_Algorithm.get_connectivity_matrix import *
 from sklearn.metrics import pairwise_distances
 
 data_path = os.getcwd()
@@ -60,11 +59,15 @@ for pipe_start_node, pipe_end_node in zip(pipe_start_nodes, pipe_end_nodes):
 # create similarity matrix based on k-nearest neighbour
 # the diagonal of W_knn is 0
 
-W_knn = pairwise_distances(X_normalized, metric="euclidean")  # shape (388,388)
+distance_matrix = pairwise_distances(X_normalized, metric="euclidean")  # shape (388,388)
 
-# get the weighted matrix by considering the distance between two connected points
-W = A * W_knn
+# get the weighted adjacency matrix by considering the distance between two connected points
+W = A * distance_matrix
 
+# calculate the Degree Matrix
+D_matrix = np.diag(np.sum(W, axis=1))
+# calculate the laplacian matrix
+L_matrix = D_matrix - W
 
 def get_diagonal(matrix):
     # assert isinstance(matrix, np.ndarray)
@@ -123,7 +126,7 @@ def running_agg_with_connectivity_matrix(data, n_clusters_list, which_matrix):
     elif which_matrix == "W_knn":
         for n_clusters in tqdm(n_clusters_list):
             # linkage = ward will minimize the variance within cluster
-            agg = AgglomerativeClustering(n_clusters=n_clusters, connectivity=W_knn, linkage="ward")
+            agg = AgglomerativeClustering(n_clusters=n_clusters, connectivity=distance_matrix, linkage="ward")
             labels = agg.fit_predict(data)
             Agg_dict[n_clusters] = labels
     elif which_matrix == "W":
@@ -328,20 +331,14 @@ def find_best_min_samples_scipy(data, eps):
 
 
 if __name__ == "__main__":
-    GetPressureData = GetPressureData("c_town", "epanet")
-    # get data
-    data_epanet = GetPressureData.get_data
-    data_epanet_mms = get_data_scaled(data_epanet)[0]
-    data_epanet_ss = get_data_scaled(data_epanet)[1]
-    data_normalized = data_normalization(data_epanet)
 
-    model = AgglomerativeClustering()
+    model = KMeans()
     #visualizer_3 = SilhouetteVisualizer(model, colors="yellowbrick")
     #visualizer_3.fit(gd.data_normalized_mms)
     #visualizer_3.show()
 
-    visualizer_3 = KElbowVisualizer(model, k=(5,101), metric="calinski_harabasz")
-    visualizer_3.fit(data_normalized)
+    visualizer_3 = KElbowVisualizer(model, k=(2, 101), metric="calinski_harabasz")
+    visualizer_3.fit(X_normalized)
     visualizer_3.show()
 
     """

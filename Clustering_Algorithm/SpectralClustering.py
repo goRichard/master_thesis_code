@@ -1,12 +1,7 @@
 from Clustering_Algorithm.ClusterAlgorithm import *
-from Clustering_Algorithm.get_connectivity_matrix import *
 import csv
 
-# calculate the Degree Matrix
-D_matrix = np.sum(W, axis=1)
 
-# calculate the laplacian matrix
-L_matrix = D_matrix - W
 
 # normalize the laplacian matrix by Ng-Jordan-Weiss Algorithm
 # L_matrix_norm = matrix_normalize(L_matrix, D_matrix)
@@ -29,42 +24,44 @@ vecs = np.real(vecs)
 
 
 # running KMeans for the eigenvectors matrix
-n_clusters = np.arange(2, 102, 1)
+n_clusters = np.arange(2, 102)
 result_sc_vecs = dict()
-result_sc_vecs_weighted = dict()
-k_list = np.arange(2, 51, 1)
+# result_sc_vecs_weighted = dict()
 
 # create csv file to evaluate score
-f1 = open("silhouette_score_new.csv", "w")
+f1 = open("cluster_result/sc/result_dimension_7.csv", "w")
 writer1 = csv.writer(f1)
-f2 = open("davies_score_new.csv", "w")
+"""
+f2 = open("cluster_result/sc/davies_score_W.csv", "w")
 writer2 = csv.writer(f2)
-f3 = open("calinski_score_new.csv", "w")
+f3 = open("cluster_result/sc/calinski_score_W.csv", "w")
 writer3 = csv.writer(f3)
+"""
 
-writer1.writerow(["n_cluster"] + list(n_clusters))
+
+#writer1.writerow(["n_cluster" , "silhouette_score" , "davis_score" , "calinski_score"])
+"""
 writer2.writerow(["n_cluster"] + list(n_clusters))
 writer3.writerow(["n_cluster"] + list(n_clusters))
+"""
 
-for k in tqdm(k_list):
-    KMeans_dict = running_KMeans(vecs[:, :k], n_clusters)  # (388,k)
-    # evaluate the algorithm
-    score_list = evaluate_Algorithm(vecs[:, :k], KMeans_dict, "KMeans")
-    score_list_1 = score_list[0]
-    score_list_2 = score_list[1]
-    score_list_3 = score_list[2]
+KMeans_dict = running_KMeans(vecs[:, :7], n_clusters)[0]  # (388,k)
 
-    score_list_1.insert(0, k)
-    score_list_2.insert(0, k)
-    score_list_3.insert(0, k)
 
-    writer1.writerow(score_list_1)
-    writer2.writerow(score_list_2)
-    writer3.writerow(score_list_3)
+print(KMeans_dict[30])
+
+
+# evaluate the algorithm
+score_list = evaluate_Algorithm(vecs[:, :7], KMeans_dict, "KMeans")
+score_list_1 = score_list[0]
+score_list_2 = score_list[1]
+score_list_3 = score_list[2]
+
+
+for n, i,j,k in zip(n_clusters, score_list_1, score_list_2, score_list_3):
+    writer1.writerow([n, i, j, k])
 
 f1.close()
-f2.close()
-f3.close()
 
 # KMeans_list_vecs_weighted = evaluate_Algorithm(vecs_weighted, result_sc_vecs_weighted, "KMeans")
 
