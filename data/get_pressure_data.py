@@ -63,11 +63,11 @@ X_epanet_ss = get_data_scaled(X_epanet)[1]
 X_normalized = data_normalization(X_epanet)
 X_normalized_mms = get_data_scaled(X_normalized)[0]
 X_normalized_ss = get_data_scaled(X_normalized)[1]
+print(f"X_normalized.shape = {X_normalized.shape}")
 # use pca to get the dimension reduction
 pca = PCA(n_components=0.99)
 pca.fit(X_normalized)
 X_reduced = pca.transform(X_normalized) #(388, 10)
-
 
 
 if __name__ == "__main__":
@@ -79,7 +79,7 @@ if __name__ == "__main__":
     plt.plot(time_step, X_epanet[1, :], "r-", label="normal pressure")
     plt.xlabel("time step")
     plt.ylabel("pressure")
-    plt.legend()
+    plt.legend(loc="best")
     plt.grid(True)
 
     plt.subplot(312)
@@ -87,13 +87,13 @@ if __name__ == "__main__":
     plt.plot(time_step, X_epanet_ss[1, :], "g-", label="standard scale pressure")
     plt.xlabel("time step")
     plt.ylabel("pressure")
-    plt.legend()
+    plt.legend(loc="best")
     plt.grid(True)
 
     plt.subplot(313)
     plt.plot(time_step, X_normalized[1, :], "r-", label="normalized pressure")
     plt.xlabel("time step")
     plt.ylabel("pressure")
-    plt.legend()
+    plt.legend(loc="best")
     plt.grid(True)
     plt.show()

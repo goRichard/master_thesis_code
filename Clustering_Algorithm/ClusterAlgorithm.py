@@ -60,7 +60,8 @@ for pipe_start_node, pipe_end_node in zip(pipe_start_nodes, pipe_end_nodes):
 # the diagonal of W_knn is 0
 
 distance_matrix = pairwise_distances(X_normalized, metric="euclidean")  # shape (388,388)
-
+new_distance_matrix = pairwise_distances(X_normalized.T, metric="euclidean") #
+print("new distance matrix shape = {}".format(new_distance_matrix.shape))
 # get the weighted adjacency matrix by considering the distance between two connected points
 W = A * distance_matrix
 
@@ -126,7 +127,7 @@ def running_agg_with_connectivity_matrix(data, n_clusters_list, which_matrix):
     elif which_matrix == "W_knn":
         for n_clusters in tqdm(n_clusters_list):
             # linkage = ward will minimize the variance within cluster
-            agg = AgglomerativeClustering(n_clusters=n_clusters, connectivity=distance_matrix, linkage="ward")
+            agg = AgglomerativeClustering(n_clusters=n_clusters, connectivity=new_distance_matrix, linkage="ward")
             labels = agg.fit_predict(data)
             Agg_dict[n_clusters] = labels
     elif which_matrix == "W":

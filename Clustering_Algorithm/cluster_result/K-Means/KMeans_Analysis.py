@@ -57,7 +57,7 @@ plt.show()
 import pandas as pd
 import matplotlib.pyplot as plt
 
-result = pd.read_csv("kmeans_score_ss.csv")
+result = pd.read_csv("kmeans_normalization_new.csv")
 n_clusters = result.values[:, 0]
 scores = result.values[:, 1:]
 

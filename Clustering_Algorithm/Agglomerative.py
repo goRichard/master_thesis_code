@@ -22,27 +22,26 @@ Agg_dict_ss = running_agg_with_connectivity_matrix(X_transformed_ss, n_clusters_
 #  the adjacency matrix has some zero elements which means it is not fully connected
 print("clustering beginns...")
 #Agg_dict_adjacency = running_agg_without_connectivity_matrix(X_reduced, n_clusters_list)
-#Agg_dict_adjacency = running_agg_without_connectivity_matrix(X_normalized, n_clusters_list, "adjacency")
+#Agg_dict_adjacency = running_agg_with_connectivity_matrix(X_normalized.T, n_clusters_list, "adjacency")
 #Agg_dict_adjacency_mms = running_agg_with_connectivity_matrix(X_normalized_mms, n_clusters_list, "adjacency")
-#Agg_dict_W_knn = running_agg_with_connectivity_matrix(X_normalized, n_clusters_list, "W_knn")
+Agg_dict_W_knn = running_agg_with_connectivity_matrix(X_normalized.T, n_clusters_list, "W_knn")
 #Agg_dict_W_knn_mms = running_agg_with_connectivity_matrix(X_normalized_mms, n_clusters_list, "W_knn")
-Agg_dict_W = running_agg_with_connectivity_matrix(X_normalized, n_clusters_list, "W")
+#Agg_dict_W = running_agg_with_connectivity_matrix(X_normalized, n_clusters_list, "W")
 #Agg_dict_W_mms = running_agg_with_connectivity_matrix(X_normalized_mms, n_clusters_list, "W")
 print("Clustering ends")
-print(Agg_dict_W[25])
 # evaluate the Agg results with 3 methods:
 # evaluate the KMeans results with 3 methods and store the value in .csv file
 print("Evaluation begins...")
-list1 = evaluate_Algorithm(X_normalized, Agg_dict_adjacency, "Agg")
+#list1 = evaluate_Algorithm(X_normalized.T, Agg_dict_adjacency, "Agg")
 #list2 = evaluate_Algorithm(X_normalized_mms, Agg_dict_adjacency_mms, "Agg")
-#list3 = evaluate_Algorithm(X_normalized, Agg_dict_W_knn, "Agg")
+list3 = evaluate_Algorithm(X_normalized, Agg_dict_W_knn, "Agg")
 #list4 = evaluate_Algorithm(X_normalized_mms, Agg_dict_W_knn_mms, "Agg")
 #list5 = evaluate_Algorithm(X_normalized, Agg_dict_W, "Agg")
 #list6 = evaluate_Algorithm(X_normalized_mms, Agg_dict_W_mms, "Agg")
 print("Evaluation ends")
 
 # create the csv file
-f1 = open("cluster_result/Agglomerative/agg_score_reduced.csv", "w")
+f1 = open("cluster_result/Agglomerative/agg_score_new.csv", "w")
 #f1 = open("cluster_result/Agglomerative/agg_score_adjacency.csv", "w")
 #f2 = open("cluster_result/Agglomerative/agg_score_adjacency_mms.csv", "w")
 #f3 = open("cluster_result/Agglomerative/agg_score_W_knn.csv", "w")
