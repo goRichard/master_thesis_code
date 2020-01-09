@@ -1,7 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 
-result = pd.read_csv("agg_score_W.csv")
+result = pd.read_csv("agg_score_adjacency.csv")
 n_clusters = result.values[:, 0]
 scores = result.values[:, 1:]
 
