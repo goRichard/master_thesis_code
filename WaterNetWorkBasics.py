@@ -59,12 +59,13 @@ class WaterNetWorkBasics:
         valve_names = [valve for valve in link_names if valve.startswith("V")]
 
         # name list
-        name_list = {"control_name_list": self.wn.control_name_list,
-                     "pattern_name_list": self.wn.pattern_name_list,
-                     "node_name_list": {"tank_names": tank_names, "reservoir_names": reservoir_names,
+        name_list = {"node_name_list": {"tank_names": tank_names, "reservoir_names": reservoir_names,
                                         "junction_names": junction_names,
                                         "junctions_with_demand": junctions_with_demand},
-                     "link_name_list": {"pump_names": pump_names, "pipe_names": pipe_names, "valve_names": valve_names}}
+                     "link_name_list": {"pump_names": pump_names, "pipe_names": pipe_names, "valve_names": valve_names},
+                     "control_name_list": self.wn.control_name_list,
+                     "pattern_name_list": self.wn.pattern_name_list
+                     }
         return name_list
 
     def get_node(self, node_name):
