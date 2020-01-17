@@ -79,8 +79,8 @@ class WaterNetWorkBasics:
 
     def get_link(self, link_names):
         """
-        :param link_name: str, name of a link (pipes, valves, pumps)
-        :return:
+        :param link_name: str, name of links (pipes, valves, pumps)
+        :return: object of link,
         """
         link_list = []
         for link_name in link_names:
