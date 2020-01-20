@@ -8,11 +8,11 @@ import time
 n_clusters_list = list(range(2, 101))  # n_cluster from 2 to 100
 
 # run Agglomerative Algorithm
-"""
+
 Agg_dict_raw = running_agg_with_connectivity_matrix(X, n_clusters_list) # data without preprocessing
 Agg_dict_mms = running_agg_with_connectivity_matrix(X_transformed_mms, n_clusters_list) # data preprocessed with mms
 Agg_dict_ss = running_agg_with_connectivity_matrix(X_transformed_ss, n_clusters_list) # data preprocessed with ss
-"""
+
 
 # agg clustering
 # the reason why problems like

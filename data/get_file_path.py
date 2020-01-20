@@ -1,6 +1,6 @@
 import os
 
-data_path = "/Users/ruizhiluo/Documents/00_Study/00_Studium/09_git/master_thesis_code/data"
+data_path = os.getcwd()
 file_path = [x for x in os.listdir(data_path) if os.path.isfile(x)]
 inp_file_path = [x for x in file_path if os.path.splitext(x)[1] == ".inp"][0]
 result_file_paths = [x for x in file_path if os.path.splitext(x)[1] == ".csv"]

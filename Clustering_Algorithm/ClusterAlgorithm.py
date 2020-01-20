@@ -13,8 +13,11 @@ from sklearn.metrics.cluster import silhouette_score
 from tqdm import *
 import math
 import scipy.spatial
-from data.get_pressure_data import *
+import os
 from sklearn.metrics import pairwise_distances
+
+from WaterNetWorkBasics import WaterNetWorkBasics
+from data.get_pressure_data import X_normalized
 
 data_path = os.getcwd()
 
@@ -332,17 +335,51 @@ def find_best_min_samples_scipy(data, eps):
 
 
 if __name__ == "__main__":
+    n_cluster_list = np.arange(2,101)
+    agglomerative_models_with_connectivity_matrix = [
+        AgglomerativeClustering(n_clusters=n_cluster, linkage="ward", connectivity=A)
+        for n_cluster in n_cluster_list]
 
-    model = KMeans()
-    #visualizer_3 = SilhouetteVisualizer(model, colors="yellowbrick")
-    #visualizer_3.fit(gd.data_normalized_mms)
-    #visualizer_3.show()
 
-    visualizer_3 = KElbowVisualizer(model, k=(2, 101), metric="calinski_harabasz")
-    visualizer_3.fit(X_normalized)
-    visualizer_3.show()
 
-    """
+    agglomerative_result_labels_with_connectivity_matrix = [
+        agglomerative_model_with_connectivity_matrix.fit_predict(X_normalized)
+        for agglomerative_model_with_connectivity_matrix in agglomerative_models_with_connectivity_matrix]
+
+    agg_silhouette_score_with_connectivity_matrix = [silhouette_score(X_normalized, label) for label in
+                                                     agglomerative_result_labels_with_connectivity_matrix]
+
+    agg_davies_score_with_connectivity_matrix = [davies_bouldin_score(X_normalized, label) for label in
+                                                 agglomerative_result_labels_with_connectivity_matrix]
+
+    agg_calinski_score_with_connectivity_matrix = [calinski_harabasz_score(X_normalized, label)
+                                                   for label in agglomerative_result_labels_with_connectivity_matrix]
+
+    plt.figure(figsize=(8, 10))
+
+    plt.subplot(311)
+    plt.title("result of agglomerative clustering method with connectivity matrix")
+    plt.plot(n_cluster_list, agg_silhouette_score_with_connectivity_matrix, "r-", label="silhouette score")
+    plt.xlabel("number of clusters")
+    plt.ylabel("silhouette score (closer to 1, better)")
+    plt.grid(True)
+
+    plt.subplot(312)
+    plt.plot(n_cluster_list, agg_davies_score_with_connectivity_matrix, "g-", label="davies_bouldin_score")
+    plt.xlabel("number of clusters")
+    plt.ylabel("davies bouldin score (smaller, better)")
+    plt.grid(True)
+
+    plt.subplot(313)
+    plt.plot(n_cluster_list, agg_calinski_score_with_connectivity_matrix, "b-", label="calinski_harabasz_score")
+    plt.xlabel("number of clusters")
+    plt.ylabel("calinski score (larger, better)")
+    plt.grid(True)
+
+    #fig.tight_layout()
+    plt.show()
+
+    """ 
 
     visualizer_2 = KElbowVisualizer(model, k=(5, 101), metric="calinski_harabasz")
     visualizer_2.fit(data_transformed_mms)
