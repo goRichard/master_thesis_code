@@ -26,14 +26,14 @@ def add_control_dictionary():
 
 class WaterNetWorkSimulation(WaterNetWorkBasics):
 
-    def __init__(self, inp_file, town_name, durations):
-        assert isinstance(durations, list)
+    def __init__(self, inp_file, town_name):
         super(WaterNetWorkSimulation, self).__init__(inp_file, town_name)
-        self._durations = durations
+        self._wn = wntr.network.WaterNetworkModel(self.inp_file)
 
-    def check_durations(self):
+    def check_durations(self, durations):
+        assert isinstance(durations, list)
         time_gap = self.wn_time_options['duration'] / self.wn_time_options['pattern_time_step']
-        if sum(self._durations) > time_gap:
+        if sum(durations) > time_gap:
             print("durations out of range, re-enter the durations")
             return False
         else:
@@ -147,8 +147,8 @@ class WaterNetWorkSimulation(WaterNetWorkBasics):
         # set the changed multipliers
         changed_multipliers = []
         for i in range(len(multipliers)):
-            operation = multiplier_operation(op_list, up_prob=0.1, down_prob=0.2, left_prob=0.2,
-                                             right_prob=0.2, gaussian_prob=0.3)
+            operation = multiplier_operation(op_list, up_prob=0.2, down_prob=0.2, left_prob=0.2,
+                                             right_prob=0.2, gaussian_prob=0.2)
 
             if operation in op_list[:2]:
                 changed_multipliers.append(operation(multipliers, i))
@@ -162,20 +162,20 @@ class WaterNetWorkSimulation(WaterNetWorkBasics):
         但是请注意，参数定义的顺序必须是：必选参数、默认参数、可变参数、命名关键字参数和关键字参数 #
         (self, var1 = true, var2 = false, var3, var4, *args, **kwargs)。
         """
-        x = self.get_time_steps
+        time_step = self.get_time_steps[1:]
         fig1 = plt.figure()
-        y1, = plt.plot(x, changed_multipliers[:len(x)], 'r')
-        y2, = plt.plot(x, original_multipliers[:len(x)], 'b')
         plt.title("{} changed curve".format(pattern_name))
+        plt.plot(time_step, changed_multipliers, 'r', label="changed")
+        plt.plot(time_step, original_multipliers, 'b', label="original")
         plt.xlabel("time(h)")
         plt.ylabel("Demand(L/s)")
-        plt.legend([y2, y1], ["changed", "original"], loc='upper left')
+        plt.legend(loc='upper left')
         plt.grid(True)
         plt.draw()
-        plt.pause(6)
+        plt.pause(1)
         plt.close(fig1)
 
-    def iterate_simulation(self):
+    def iterate_simulation(self, durations):
 
         """
         set mode to DD: demand driven
@@ -193,9 +193,9 @@ class WaterNetWorkSimulation(WaterNetWorkBasics):
         """
 
         sim_results = []
-        self.check_durations()
-        for i in range(len(self._durations)):
-            self._wn.options.time.duration = sum(self._durations[:i + 1]) * 3600
+        self.check_durations(durations)
+        for i in range(len(durations)):
+            self._wn.options.time.duration = sum(durations[:i + 1]) * 3600
             print('\n')
             print("new simulation starts")
             print('-' * 50)
@@ -222,17 +222,17 @@ class WaterNetWorkSimulation(WaterNetWorkBasics):
                 epanet_or_wntr = input("use EPANET or WNTR simulator: ")
                 if epanet_or_wntr == "EPANET":
                     sim_results.append(self.do_simulation_from_beginning_epanet)
-                    print("simulation duration from {} h to {} h ".format(0, sum(self._durations[:i + 1])))
+                    print("simulation duration from {} h to {} h ".format(0, sum(durations[:i + 1])))
                 else:
                     # self._wn.options.time.duration = sum(self._durations[:i + 1]) * 3600
                     sim_results.append(self.do_simulation_from_beginning_wntr_1)
-                    print("simulation duration from {} h to {} h ".format(0, sum(self._durations[:i + 1])))
+                    print("simulation duration from {} h to {} h ".format(0, sum(durations[:i + 1])))
                     # sim_results.append(self.do_simulation_from_beginning_wntr_2) don not use this method
             else:
                 # self._wn.options.time.duration = sum(self._durations[:i + 1]) * 3600
                 sim_results.append(self.do_simulation_wntr)
-                print("simulation duration from {} h to {} h ".format(sum(self._durations[:i]),
-                                                                      sum(self._durations[:i + 1])))
+                print("simulation duration from {} h to {} h ".format(sum(durations[:i]),
+                                                                      sum(durations[:i + 1])))
             print("-" * 50)
 
             remove_controls = input('remove controls? (True/False):')
@@ -240,24 +240,35 @@ class WaterNetWorkSimulation(WaterNetWorkBasics):
                 remove_control_list = input('control to be removed (dictionary type):')
                 self.remove_controls(remove_control_list)
             print("-" * 50)
+        self.save_result_file(sim_results)
         return sim_results
+
+    def save_result_file(self, sim_results):
+        save_path = os.getcwd() + "/data"
+        i = 0
+        for result in sim_results:
+            file_name = save_path + '/' + 'pressure_' + str(i) + '_epanet_whole' + "_changed_multipliers" + '.csv'
+            result.node['pressure'].to_csv(file_name)
+            i += 1
+        print("save file at : {}".format(save_path))
+
 
 
 if __name__ == "__main__":
     inp_file = "data/c-town_true_network.inp"
-    c_town_simulation = WaterNetWorkSimulation(inp_file, "c_town", [168])
-    results = c_town_simulation.iterate_simulation()
-    save_path = os.getcwd() + "/data"
-    print("save file at : {}".format(save_path))
-    i = 0
-    for result in results:
-        file_name = save_path + '/' + 'pressure_' + str(i) + '_epanet_whole' + '.csv'
+    c_town_simulation = WaterNetWorkSimulation(inp_file, "c_town")
+    #results = c_town_simulation.iterate_simulation()
+    #save_path = os.getcwd() + "/data"
+    #print("save file at : {}".format(save_path))
+    #i = 0
+    #for result in results:
+    #    file_name = save_path + '/' + 'pressure_' + str(i) + '_epanet_whole' + '.csv'
         #        file_name_disturbance = current_path + '/' + 'disturbance_' + str(
         #           i) + '_multipliers_changed_down_dma_5' + '.csv'
         #        file_name_flow_rate = current_path + '/' + 'flow_rate_' + str(
         #         i) + '_multipliers_changed_down_dma_5' + '.csv'
 
-        result.node['pressure'].to_csv(file_name)
+    #    result.node['pressure'].to_csv(file_name)
         #        result.node['demand'].to_csv(file_name_disturbance)
         #        result.link['flowrate'].to_csv(file_name_flow_rate)
-        i += 1
+    #    i += 1
